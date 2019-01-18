@@ -1,0 +1,66 @@
+#!/usr/bin/expect -f
+
+set server [lindex $argv 0];
+set git_command [lindex $argv 1];
+set project_location [lindex $argv 2];
+
+if {[llength $argv] == 0} {
+  send_user "Usage: qkupdate server_nick [git_command] [project_location]\n"
+  exit 1
+}
+
+if { $project_location == "" } {
+	set project_location "project";
+}
+
+send_user "\n#####\n# $server\n#####\n"
+
+if { $server == "servername1" } { 
+    	spawn ssh -p 1234 servername1@host
+	expect {
+	  timeout { send_user "\nFailed to get password prompt\n"; exit 1 }
+	  eof { send_user "\nSSH failure for $server\n"; exit 1 }
+	  "*assword"
+	}
+	set password "pass#"
+	send "$password\r"
+
+	expect {
+	  timeout { send_user "\nLogin failed. Password incorrect.\n"; exit 1}
+	  "*\$ "
+	}
+
+	if { $git_command == "pull" } {					
+		send "cd $project_location\r"
+		send "git pull\r"
+		expect {
+		  timeout { send_user "\nFailed to get Username prompt\n"; exit 1 }
+		  eof { send_user "\nGit failure for $command\n"; exit 1 }
+		  "*sername"
+		}
+		set username "user"
+		send "$username\r"
+
+		expect {
+		  timeout { send_user "\nGit failed. Username incorrect.\n"; exit 1}
+		  "*assword"
+		}
+		set password "pass"
+		send "$password\r"
+
+		expect {
+		  timeout { send_user "\nGit failed. Password incorrect.\n"; exit 1}
+		  "*\$ "
+		}
+
+		send "php bin/console c:clear -e prod\r"
+		send "php bin/console c:clear\r"
+
+		interact
+	} else {
+		interact
+	}
+
+} else { 
+    send_user "Can\'t Recognize Server!\n" 
+}
