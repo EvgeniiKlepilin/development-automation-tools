@@ -1,0 +1,35 @@
+#!/usr/bin/expect -f
+
+set command [lindex $argv 0];
+
+if {[llength $argv] == 0} {
+  send_user "Usage: qkgit pull\n"
+  exit 1
+}
+
+send_user "\n#####\n# $command\n#####\n"
+
+if { $command == "pull" } { 
+    	spawn git pull
+	expect {
+	  timeout { send_user "\nFailed to get Username prompt\n"; exit 1 }
+	  eof { send_user "\nGit failure for $command\n"; exit 1 }
+	  "*sername"
+	}
+	set username "user"
+	send "$username\r"
+
+	expect {
+	  timeout { send_user "\nGit failed. Username incorrect.\n"; exit 1}
+	  "*assword"
+	}
+	set password "pass"
+	send "$password\r"
+
+	expect {
+	  timeout { send_user "\nGit failed. Password incorrect.\n"; exit 1}
+	  "*\$ "
+	}
+} else { 
+    send_user "Can\'t Recognize Git Command!\n" 
+}
